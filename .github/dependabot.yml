@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    commit-message:
+      prefix: "gomod"
+    open-pull-requests-limit: 1
+    schedule:
+      interval: daily
+    reviewers:
+      - "bogdanserdinov"

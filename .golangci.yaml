@@ -1,0 +1,10 @@
+run:
+  modules-download-mode: readonly
+linters:
+  presets:
+    - bugs
+    - format
+    - unused
+  disable:
+    - gci
+    - gofumpt
