@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
-      POSTGRES_NAME: postgres
+      POSTGRES_DB: dummy_db
     volumes:
       - database_data:/var/lib/postgresql/data
     ports:
