@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"github.com/google/uuid"
 	"time"
 )
@@ -24,8 +23,4 @@ type Dummy struct {
 	Description string
 	UpdatedAt   time.Time
 	CreatedAt   time.Time
-}
-
-func (service *Service) Create(ctx context.Context, dummy Dummy) error {
-	return service.db.CreateDummy(ctx, dummy)
 }

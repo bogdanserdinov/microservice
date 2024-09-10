@@ -23,6 +23,6 @@ func (db *DB) CreateDummy(ctx context.Context, dummy service.Dummy) error {
 	query := `INSERT INTO dummies(id, status, description, created_at)
 	          VALUES ($1, $2, $3, $4)`
 
-	_, err := db.inner.ExecContext(ctx, query, dummy.ID, dummy.Description, dummy.CreatedAt)
+	_, err := db.inner.ExecContext(ctx, query, dummy.ID, dummy.Status, dummy.Description, dummy.CreatedAt)
 	return err
 }

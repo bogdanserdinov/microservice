@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"github.com/google/uuid"
 )
 
 type DB interface {
@@ -12,18 +12,20 @@ type DB interface {
 
 type Service struct {
 	db DB
-
-	requests *prometheus.HistogramVec
 }
 
-func New(db DB, exporter promauto.Factory) *Service {
-	requests := exporter.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "api_requests",
-		Buckets: []float64{0.05, 0.1, 0.2, 0.3, 0.5, 1, 1.5, 2, 2.5, 3},
-	}, []string{})
-
+func New(db DB) *Service {
 	return &Service{
-		db:       db,
-		requests: requests,
+		db: db,
 	}
+}
+
+func (service *Service) Create(ctx context.Context, status Status, description string) error {
+	dummy := Dummy{
+		ID:          uuid.New(),
+		Status:      status,
+		Description: description,
+	}
+
+	return service.db.CreateDummy(ctx, dummy)
 }
