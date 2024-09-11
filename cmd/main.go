@@ -56,6 +56,8 @@ func main() {
 		return
 	}
 
+	db.SetMaxOpenConns()
+
 	app := microservice.New(logger, *cfg, db)
 
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
