@@ -3,9 +3,6 @@ package public
 import (
 	"context"
 	"errors"
-	"microservice/metrics"
-	"microservice/pkg/http/cors"
-	"microservice/pkg/http/server"
 	"net"
 	"net/http"
 	"time"
@@ -14,6 +11,9 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"microservice/metrics"
+	"microservice/pkg/http/cors"
+	"microservice/pkg/http/server"
 	"microservice/servers/public/controllers"
 	"microservice/service"
 )
@@ -61,7 +61,7 @@ func (server *Server) ObserveHandlerDuration(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		defer func() {
-			server.metrics.ApiRequests.WithLabelValues().Observe(time.Since(start).Seconds())
+			server.metrics.APIRequests.WithLabelValues().Observe(time.Since(start).Seconds())
 		}()
 
 		next.ServeHTTP(w, r.Clone(r.Context()))

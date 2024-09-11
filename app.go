@@ -3,17 +3,18 @@ package microservice
 import (
 	"context"
 	"database/sql"
+	"net/http"
+	"time"
+
 	"github.com/alexliesenfeld/health"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+
 	"microservice/database"
 	"microservice/metrics"
-	"net/http"
-	"time"
-
 	"microservice/pkg/http/server"
 	"microservice/servers/private"
 	"microservice/servers/public"

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -25,6 +26,8 @@ func (service *Service) Create(ctx context.Context, status Status, description s
 		ID:          uuid.New(),
 		Status:      status,
 		Description: description,
+		UpdatedAt:   time.Now().UTC(),
+		CreatedAt:   time.Now().UTC(),
 	}
 
 	return service.db.CreateDummy(ctx, dummy)

@@ -2,12 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
-	http_errors "microservice/pkg/http/errors"
-
 	"net/http"
 
 	"go.uber.org/zap"
+	http_errors "microservice/pkg/http/errors"
 
 	"microservice/service"
 )
@@ -44,7 +42,7 @@ func (controller *Dummy) Create(w http.ResponseWriter, r *http.Request) {
 	err := controller.service.Create(ctx, req.Status, req.Description)
 	if err != nil {
 		controller.log.Error("could not create dummy record", zap.Error(err))
-		http_errors.ServeError(w, http.StatusInternalServerError, errors.New("could not create dummy entity"))
+		http_errors.ServeError(w, http.StatusInternalServerError, err)
 		return
 	}
 }

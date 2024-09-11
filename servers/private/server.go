@@ -3,18 +3,18 @@ package private
 import (
 	"context"
 	"errors"
-	"github.com/alexliesenfeld/health"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"microservice/pkg/http/cors"
 	"net"
 	"net/http"
 	"time"
 
+	"github.com/alexliesenfeld/health"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"microservice/pkg/http/cors"
 	"microservice/pkg/http/server"
 )
 

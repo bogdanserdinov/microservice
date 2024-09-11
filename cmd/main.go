@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"database/sql"
-	"github.com/caarlos0/env/v6"
-	_ "github.com/joho/godotenv/autoload"
-	"go.uber.org/zap"
 	"log"
-	"microservice"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/caarlos0/env/v6"
+	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq" // using postgres driver.
+	"go.uber.org/zap"
+
+	"microservice"
 )
 
 func main() {
@@ -39,7 +40,6 @@ func main() {
 	if err != nil {
 		logger.Fatal("could not parse config", zap.Error(err))
 	}
-	logger.Info("cfg", zap.Any("cfg", cfg))
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
@@ -57,13 +57,8 @@ func main() {
 	}
 
 	app := microservice.New(logger, *cfg, db)
-	if err != nil {
-		logger.Error("can't initialize app", zap.Error(err))
-		return
-	}
 
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
-
 }
 
 // onSigInt fires on a SIGINT or SIGTERM event (usually CTRL+C).
@@ -76,32 +71,6 @@ func onSigInt(onSigInt func()) {
 		onSigInt()
 	}()
 }
-
-//func getConfigFromEnv() (*microservice.Config, error) {
-//	cfg := new(microservice.Config)
-//
-//	viper.AutomaticEnv()
-//	viper.SetConfigType("env")
-//	//viper.AllowEmptyEnv(false)
-//	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-//
-//	// setting up filepath of env file to load, used only for local development.
-//	//path := os.Getenv("ENV_PATH")
-//	readFromFile := viper.GetBool("READ_FROM_FILE")
-//	if readFromFile {
-//		// looking for the .env file from the root.
-//		viper.SetConfigName(".env")
-//		viper.AddConfigPath("./")
-//	}
-//
-//	err := viper.ReadInConfig()
-//	if err != nil {
-//		return cfg, err
-//	}
-//
-//	err = viper.Unmarshal(cfg)
-//	return cfg, nil
-//}
 
 func getConfigFromEnv() (*microservice.Config, error) {
 	cfg := new(microservice.Config)
