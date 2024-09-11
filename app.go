@@ -22,6 +22,12 @@ import (
 )
 
 type Config struct {
+	Database struct {
+		URL                string        `env:"URL,required"`
+		MaxOpenConnections int           `env:"MAX_OPEN_CONNECTIONS" envDefault:"25"`
+		MaxIdleConnections int           `env:"MAX_IDLE_CONNECTIONS" envDefault:"25"`
+		MaxConnLifetime    time.Duration `env:"MAX_CONN_LIFETIME"    envDefault:"5m"`
+	} `envPrefix:"DATABASE_"`
 	DatabaseURL   string        `env:"DATABASE_URL,required"`
 	PublicServer  server.Config `envPrefix:"PUBLIC_SERVER_"`
 	PrivateServer server.Config `envPrefix:"PRIVATE_SERVER_"`

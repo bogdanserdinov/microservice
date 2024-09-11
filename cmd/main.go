@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		logger.Fatal("could not parse config", zap.Error(err))
 	}
+	logger.Info("", zap.Any("cfg", cfg))
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
@@ -54,6 +55,12 @@ func main() {
 	if err := db.Ping(); err != nil {
 		logger.Error("can't ping database", zap.Error(err))
 		return
+	}
+
+	{ // configuring db pooling.
+		db.SetMaxOpenConns(cfg.Database.MaxOpenConnections)
+		db.SetMaxIdleConns(cfg.Database.MaxIdleConnections)
+		db.SetConnMaxLifetime(cfg.Database.MaxConnLifetime)
 	}
 
 	app := microservice.New(logger, *cfg, db)

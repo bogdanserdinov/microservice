@@ -11,4 +11,4 @@ Features:
 - Pull Request Template: Standardized PR template for contributing to the project.
 - Dockerfile: Dockerized service for easy deployment.
 - Docker Compose for 3rd dependencies.
-- DB Connection Pool Management: Efficient connection pooling to manage database connections and improve performance.
+- Ability to configure num of db in-use/idle connections.
