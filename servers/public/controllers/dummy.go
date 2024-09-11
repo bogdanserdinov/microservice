@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"go.uber.org/zap"
-	http_errors "microservice/pkg/http/errors"
 
+	http_errors "microservice/pkg/http/errors"
 	"microservice/service"
 )
 
