@@ -2,7 +2,7 @@
 
 This project is a simple microservice built in Go, designed as a template for creating robust, scalable microservices. It comes with various built-in features such as graceful shutdown, readiness probes, metrics collection, and CI/CD integration.
 
-Features
+Features:
 - Graceful Shutdown: Ensures that the service shuts down properly, finishing in-flight requests before termination.
 - Readiness Probe: Kubernetes-ready health check to determine when the service is ready to handle traffic.
 - Metrics: Integrated with Prometheus for collecting service-level metrics.
