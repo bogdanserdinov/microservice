@@ -7,7 +7,7 @@ Features:
 - Readiness Probe: Kubernetes-ready health check to determine when the service is ready to handle traffic.
 - Metrics: Integrated with Prometheus for collecting service-level metrics.
 - Dependabot: Automatic dependency management using GitHub Dependabot.
-- GitHub Actions: CI/CD pipelines for automated testing and deployment.
+- GitHub Actions: CI pipeline runs automated checks on every push and pull request to the `main` branch (Build and Lint).
 - Pull Request Template: Standardized PR template for contributing to the project.
 - Dockerfile: Dockerized service for easy deployment.
 - Docker Compose for 3rd dependencies.
