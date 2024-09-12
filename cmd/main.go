@@ -18,8 +18,7 @@ import (
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	onSigInt(func() {
-		// starting graceful shutdown on context cancellation.
+	gracefulShutdown(func() {
 		cancel()
 	})
 
@@ -68,14 +67,13 @@ func main() {
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
 }
 
-// onSigInt fires on a SIGINT or SIGTERM event (usually CTRL+C).
-func onSigInt(onSigInt func()) {
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+func gracefulShutdown(actions func()) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		<-done
-		onSigInt()
+		<-quit
+		actions()
 	}()
 }
 
