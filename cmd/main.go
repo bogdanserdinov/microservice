@@ -39,7 +39,6 @@ func main() {
 	if err != nil {
 		logger.Fatal("could not parse config", zap.Error(err))
 	}
-	logger.Info("", zap.Any("cfg", cfg))
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
