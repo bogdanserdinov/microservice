@@ -13,5 +13,13 @@ services:
     ports:
       - "5432:5432"
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.36
+    container_name: jaeger
+    ports:
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+
 volumes:
   database_data:

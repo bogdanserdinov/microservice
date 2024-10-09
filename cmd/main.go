@@ -11,6 +11,12 @@ import (
 	"github.com/caarlos0/env/v6"
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq" // using postgres driver.
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"microservice"
@@ -40,7 +46,15 @@ func main() {
 		logger.Fatal("could not parse config", zap.Error(err))
 	}
 
-	db, err := sql.Open("postgres", cfg.DatabaseURL)
+	tracer, shutdown, err := initTracer("dummy_service", cfg.Traces.JaegerEndpoint)
+	if err != nil {
+		logger.Fatal("could not init tracer", zap.Error(err))
+	}
+	defer func() {
+		_ = shutdown(ctx)
+	}()
+
+	db, err := sql.Open("postgres", cfg.Database.URL)
 	if err != nil {
 		logger.Error("can't open connection to postgres", zap.Error(err))
 		return
@@ -61,9 +75,29 @@ func main() {
 		db.SetConnMaxLifetime(cfg.Database.MaxConnLifetime)
 	}
 
-	app := microservice.New(logger, *cfg, db)
+	app := microservice.New(logger, *cfg, tracer, db)
 
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
+}
+
+func initTracer(serviceName, jaegerURL string) (trace.Tracer, func(ctx context.Context) error, error) {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerURL)))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exp),
+		sdktrace.WithResource(resource.NewSchemaless(
+			attribute.String("service.name", serviceName),
+		)),
+	)
+
+	otel.SetTracerProvider(tp)
+
+	tracer := otel.Tracer(serviceName)
+
+	return tracer, tp.Shutdown, nil
 }
 
 func gracefulShutdown(actions func()) {

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -24,11 +25,12 @@ type Server struct {
 	server *http.Server
 
 	metrics *metrics.Metrics
+	tracer  trace.Tracer
 
 	service *service.Service
 }
 
-func New(cfg server.Config, log *zap.Logger, service *service.Service, metrics *metrics.Metrics) *Server {
+func New(cfg server.Config, log *zap.Logger, metrics *metrics.Metrics, tracer trace.Tracer, service *service.Service) *Server {
 	server := &Server{
 		cfg: cfg,
 		server: &http.Server{
@@ -37,6 +39,7 @@ func New(cfg server.Config, log *zap.Logger, service *service.Service, metrics *
 		},
 		log:     log,
 		metrics: metrics,
+		tracer:  tracer,
 		service: service,
 	}
 
@@ -46,7 +49,7 @@ func New(cfg server.Config, log *zap.Logger, service *service.Service, metrics *
 }
 
 func (server *Server) initRoutes() {
-	controller := controllers.NewDummy(server.log, server.service)
+	controller := controllers.NewDummy(server.log, server.tracer, server.service)
 
 	router := mux.NewRouter()
 	router.Use(server.ObserveHandlerDuration)

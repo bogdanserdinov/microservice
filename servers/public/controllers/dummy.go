@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	http_errors "microservice/pkg/http/errors"
@@ -11,20 +12,24 @@ import (
 )
 
 type Dummy struct {
-	log *zap.Logger
+	log    *zap.Logger
+	tracer trace.Tracer
 
 	service *service.Service
 }
 
-func NewDummy(log *zap.Logger, service *service.Service) *Dummy {
+func NewDummy(log *zap.Logger, tracer trace.Tracer, service *service.Service) *Dummy {
 	return &Dummy{
 		log:     log,
+		tracer:  tracer,
 		service: service,
 	}
 }
 
 func (controller *Dummy) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := controller.tracer.Start(r.Context(), "create_http")
+	defer span.End()
 
 	req := struct {
 		Status      service.Status `json:"status"`
