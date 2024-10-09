@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -28,7 +29,11 @@ type Config struct {
 		MaxIdleConnections int           `env:"MAX_IDLE_CONNECTIONS" envDefault:"25"`
 		MaxConnLifetime    time.Duration `env:"MAX_CONN_LIFETIME"    envDefault:"5m"`
 	} `envPrefix:"DATABASE_"`
-	DatabaseURL   string        `env:"DATABASE_URL,required"`
+
+	Traces struct {
+		JaegerEndpoint string `env:"JAEGER_ENDPOINT,required"`
+	} `envPrefix:"TRACES_"`
+
 	PublicServer  server.Config `envPrefix:"PUBLIC_SERVER_"`
 	PrivateServer server.Config `envPrefix:"PRIVATE_SERVER_"`
 }
@@ -44,7 +49,7 @@ type App struct {
 	privateServer *private.Server
 }
 
-func New(log *zap.Logger, cfg Config, db *sql.DB) *App {
+func New(log *zap.Logger, cfg Config, tracer trace.Tracer, db *sql.DB) *App {
 	app := &App{
 		cfg: cfg,
 		log: log,
@@ -55,15 +60,16 @@ func New(log *zap.Logger, cfg Config, db *sql.DB) *App {
 	prom := metrics.New(factory)
 
 	{ // service initialization.
-		app.dummy = service.New(database.New(db))
+		app.dummy = service.New(tracer, database.New(db))
 	}
 
 	{ // public server initialization.
 		app.publicServer = public.New(
 			cfg.PublicServer,
 			log,
-			app.dummy,
 			prom,
+			tracer,
+			app.dummy,
 		)
 	}
 

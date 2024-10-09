@@ -13,5 +13,13 @@ services:
     ports:
       - "5432:5432"
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "4318:4318"
 volumes:
   database_data:
