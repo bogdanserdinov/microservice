@@ -27,7 +27,6 @@ func NewDummy(log *zap.Logger, tracer trace.Tracer, service *service.Service) *D
 }
 
 func (controller *Dummy) Create(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 	ctx, span := controller.tracer.Start(r.Context(), "create_http")
 	defer span.End()
 
