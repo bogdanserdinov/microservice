@@ -21,5 +21,6 @@ services:
     ports:
       - "16686:16686"
       - "4318:4318"
+
 volumes:
   database_data:
