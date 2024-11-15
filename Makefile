@@ -12,3 +12,9 @@ migrations-up:
 
 migrations-down:
 	cd database/migrations && sql-migrate down
+
+build:
+	docker build -t $(IMAGE_NAME) .
+
+lint-dockerfile:
+	hadolint Dockerfile
