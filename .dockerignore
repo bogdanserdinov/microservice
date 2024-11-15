@@ -1,0 +1,30 @@
+# Exclude version control system files
+.git/
+.gitignore
+
+# Exclude dependency directories
+vendor/
+
+# Exclude IDE/editor configuration files
+.vscode/
+.idea/
+*.code-workspace
+
+# Exclude environment files
+.env
+.env.*
+
+# Exclude Dockerfiles and .dockerignore (optional, if not needed in the image)
+Dockerfile
+.dockerignore
+
+README.md
+
+# Linter
+.golangci.yaml
+
+# Makefile
+Makefile
+
+# Pipeline
+.github/
