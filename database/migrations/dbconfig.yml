@@ -1,5 +1,5 @@
 development:
   dialect: postgres
-  datasource: postgresql://pguser:pgpass@127.0.0.1/dummy_db?sslmode=disable
+  datasource: postgresql://pguser:pgpass@127.0.0.1:5432/dummy_db?sslmode=disable
   dir: .
   table: migrations

@@ -22,17 +22,21 @@ import (
 	"microservice/service"
 )
 
-type Config struct {
-	Database struct {
-		URL                string        `env:"URL,required"`
-		MaxOpenConnections int           `env:"MAX_OPEN_CONNECTIONS" envDefault:"25"`
-		MaxIdleConnections int           `env:"MAX_IDLE_CONNECTIONS" envDefault:"25"`
-		MaxConnLifetime    time.Duration `env:"MAX_CONN_LIFETIME"    envDefault:"5m"`
-	} `envPrefix:"DATABASE_"`
+type DatabaseConfig struct {
+	URL                string        `env:"URL,required"`
+	MaxOpenConnections int           `env:"MAX_OPEN_CONNECTIONS" envDefault:"25"`
+	MaxIdleConnections int           `env:"MAX_IDLE_CONNECTIONS" envDefault:"25"`
+	MaxConnLifetime    time.Duration `env:"MAX_CONN_LIFETIME"    envDefault:"5m"`
+}
 
-	Traces struct {
-		JaegerEndpoint string `env:"JAEGER_ENDPOINT,required"`
-	} `envPrefix:"TRACES_"`
+type TracesConfig struct {
+	JaegerEndpoint string `env:"JAEGER_ENDPOINT,required"`
+}
+
+type Config struct {
+	Database DatabaseConfig `envPrefix:"DATABASE_"`
+
+	Traces TracesConfig `envPrefix:"TRACES_"`
 
 	PublicServer  server.Config `envPrefix:"PUBLIC_SERVER_"`
 	PrivateServer server.Config `envPrefix:"PRIVATE_SERVER_"`

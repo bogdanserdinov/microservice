@@ -16,6 +16,12 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Check make version
+        run: make --version
+
+      - name: Install migrate tool
+        run: go install github.com/rubenv/sql-migrate/...@latest
+
       - name: Build
         run: go build ./...
 
@@ -23,3 +29,12 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           args: --timeout 10m
+
+      - name: Set up application environment
+        run: make up
+
+      - name: Apply migrations
+        run: migrations-up
+
+      - name: Run tests
+        run: go test -v ./...
