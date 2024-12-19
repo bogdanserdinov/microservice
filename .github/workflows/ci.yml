@@ -20,9 +20,6 @@ jobs:
       - name: Install migrate tool
         run: go install github.com/rubenv/sql-migrate/...@latest
 
-      - name: Check Docker Compose
-        run: docker-compose --version
-
       - name: Build
         run: go build ./...
 
