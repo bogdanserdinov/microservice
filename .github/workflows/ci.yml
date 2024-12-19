@@ -29,7 +29,7 @@ jobs:
           args: --timeout 10m
 
       - name: Set up application environment
-        run: make up
+        run: make up && sleep 10
 
       - name: Apply migrations
         run: make migrations-up
