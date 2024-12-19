@@ -3,12 +3,14 @@ package tests
 import (
 	"context"
 	"database/sql"
+	"log"
+
 	"github.com/caarlos0/env/v6"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"log"
+
 	"microservice"
 	"microservice/database"
 	"microservice/pkg/tracer"
