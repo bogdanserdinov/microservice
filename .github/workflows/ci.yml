@@ -32,7 +32,7 @@ jobs:
         run: make up
 
       - name: Apply migrations
-        run: migrations-up
+        run: make migrations-up
 
       - name: Run tests
         run: go test -v ./...
