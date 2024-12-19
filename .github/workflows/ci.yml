@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Pipeline
 
 on:
   push:
@@ -8,13 +8,17 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Install migrate tool
+        run: go install github.com/rubenv/sql-migrate/...@latest
 
       - name: Build
         run: go build ./...
@@ -23,3 +27,12 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           args: --timeout 10m
+
+      - name: Set up application environment
+        run: make up && sleep 10
+
+      - name: Apply migrations
+        run: make migrations-up
+
+      - name: Run tests
+        run: go test -v ./...

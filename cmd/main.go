@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"microservice/pkg/tracer"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,13 +12,6 @@ import (
 	"github.com/caarlos0/env/v6"
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq" // using postgres driver.
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"microservice"
@@ -47,12 +41,15 @@ func main() {
 		logger.Fatal("could not parse config", zap.Error(err))
 	}
 
-	tracer, shutdown, err := initTracer(ctx, "dummy_service", cfg.Traces.JaegerEndpoint)
+	tracer, shutdown, err := tracer.Init(ctx, "dummy_service", cfg.Traces.JaegerEndpoint)
 	if err != nil {
 		logger.Fatal("could not init tracer", zap.Error(err))
 	}
 	defer func() {
-		_ = shutdown(ctx)
+		err = shutdown(ctx)
+		if err != nil {
+			logger.Error("could not shutdown the tracer", zap.Error(err))
+		}
 	}()
 
 	db, err := sql.Open("postgres", cfg.Database.URL)
@@ -61,7 +58,8 @@ func main() {
 		return
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
+		err = db.Close()
+		if err != nil {
 			logger.Error("can't close connection to postgres", zap.Error(err))
 		}
 	}()
@@ -79,31 +77,6 @@ func main() {
 	app := microservice.New(logger, *cfg, tracer, db)
 
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
-}
-
-func initTracer(ctx context.Context, serviceName, jaegerURL string) (trace.Tracer, func(ctx context.Context) error, error) {
-	client := otlptracehttp.NewClient(
-		otlptracehttp.WithInsecure(),
-		otlptracehttp.WithEndpointURL(jaegerURL),
-	)
-
-	exporter, err := otlptrace.New(ctx, client)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),
-		sdktrace.WithResource(resource.NewSchemaless(
-			attribute.String("service.name", serviceName),
-		)),
-	)
-
-	otel.SetTracerProvider(tp)
-
-	tracer := otel.Tracer(serviceName)
-
-	return tracer, tp.Shutdown, nil
 }
 
 func gracefulShutdown(actions func()) {
