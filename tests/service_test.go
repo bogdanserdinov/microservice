@@ -22,16 +22,12 @@ func (s *MicroserviceSuite) TestMicroserviceSuite() {
 	ctx := context.Background()
 
 	t.Run("create with invalid status", func(t *testing.T) {
-		t.Parallel()
-
 		err := s.service.Create(ctx, "test", "test")
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid input value for enum status")
 	})
 
 	t.Run("create", func(t *testing.T) {
-		t.Parallel()
-
 		err := s.service.Create(ctx, service.StatusSuccess, "test")
 		require.NoError(t, err)
 	})
