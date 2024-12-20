@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"go.opentelemetry.io/otel/trace"
@@ -26,20 +27,27 @@ func NewDummy(log *zap.Logger, tracer trace.Tracer, service *service.Service) *D
 	}
 }
 
+type CreateRequest struct {
+	Status      service.Status `json:"status"`
+	Description string         `json:"description"`
+}
+
 func (controller *Dummy) Create(w http.ResponseWriter, r *http.Request) {
 	ctx, span := controller.tracer.Start(r.Context(), "create_http")
 	defer span.End()
 
-	req := struct {
-		Status      service.Status `json:"status"`
-		Description string         `json:"description"`
-	}{}
+	req := new(CreateRequest)
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&req); err != nil {
+	if err := decoder.Decode(req); err != nil {
 		http_errors.ServeError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if !req.Status.IsValid() {
+		http_errors.ServeError(w, http.StatusBadRequest, errors.New("invalid status"))
 		return
 	}
 

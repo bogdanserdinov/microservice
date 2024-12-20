@@ -6,18 +6,15 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 
 	"microservice/service"
 )
 
-// TestMicroserviceSuite is root function that under the hood runs all tests within the suite.
-func TestMicroserviceSuite(t *testing.T) {
-	suite.Run(t, new(MicroserviceSuite))
-}
-
-func (s *MicroserviceSuite) TestMicroserviceSuite() {
+func (s *MicroserviceSuite) TestService() {
 	t := s.T()
+
+	// Service tests covers both the service and the database.
+	s.WithRealDB()
 
 	ctx := context.Background()
 
