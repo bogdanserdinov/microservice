@@ -6,12 +6,14 @@ import (
 	"net/http"
 )
 
+type Response struct {
+	Error string `json:"error"`
+}
+
 func ServeError(w http.ResponseWriter, status int, err error) {
 	w.WriteHeader(status)
 
-	response := struct {
-		Error string `json:"error"`
-	}{
+	response := Response{
 		Error: err.Error(),
 	}
 
