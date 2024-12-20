@@ -28,8 +28,8 @@ func (s *MicroserviceSuite) TestHandler() {
 		}
 
 		resp := s.MakeRequest(req)
-		assert.Equal(t, resp.StatusCode, http.StatusBadRequest)
-		assert.Equal(t, getErrorMsg(t, resp), "invalid status")
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		assert.Equal(t, "invalid status", getErrorMsg(t, resp))
 	})
 
 	t.Run("invalid request", func(t *testing.T) {
@@ -39,7 +39,7 @@ func (s *MicroserviceSuite) TestHandler() {
 		}
 
 		resp := s.MakeRequest(req)
-		assert.Equal(t, resp.StatusCode, http.StatusOK)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	})
 }
 
@@ -64,6 +64,8 @@ func getErrorMsg(t *testing.T, resp *http.Response) string {
 	var errorResp api_errors.Response
 	err := json.NewDecoder(resp.Body).Decode(&errorResp)
 	require.NoError(t, err)
+
+	require.NoError(t, resp.Body.Close())
 
 	return errorResp.Error
 }
