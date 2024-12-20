@@ -32,13 +32,17 @@ func (s *MicroserviceSuite) TestHandler() {
 		assert.Equal(t, "invalid status", getErrorMsg(t, resp))
 	})
 
-	t.Run("invalid request", func(t *testing.T) {
+	t.Run("successful request", func(t *testing.T) {
 		req := controllers.CreateRequest{
 			Status:      service.StatusSuccess,
 			Description: "description",
 		}
 
 		resp := s.MakeRequest(req)
+		defer func() {
+			require.NoError(t, resp.Body.Close())
+		}()
+
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	})
 }
