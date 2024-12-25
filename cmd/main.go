@@ -4,10 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"microservice/pkg/tracer"
 	"os"
 	"os/signal"
-	"syscall"
 
 	"github.com/caarlos0/env/v6"
 	_ "github.com/joho/godotenv/autoload"
@@ -15,13 +13,12 @@ import (
 	"go.uber.org/zap"
 
 	"microservice"
+	"microservice/pkg/tracer"
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	gracefulShutdown(func() {
-		cancel()
-	})
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
 
 	loggerCfg := zap.NewProductionConfig()
 	logger, err := loggerCfg.Build()
@@ -77,16 +74,6 @@ func main() {
 	app := microservice.New(logger, *cfg, tracer, db)
 
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
-}
-
-func gracefulShutdown(actions func()) {
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		<-quit
-		actions()
-	}()
 }
 
 func getConfigFromEnv() (*microservice.Config, error) {
