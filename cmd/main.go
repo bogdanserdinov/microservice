@@ -71,13 +71,13 @@ func main() {
 		db.SetConnMaxLifetime(cfg.Database.MaxConnLifetime)
 	}
 
-	app := microservice.New(logger, *cfg, tracer, db)
+	app := microservice.New(logger, cfg, tracer, db)
 
 	logger.Info("servers shutdown err", zap.Error(app.Run(ctx)))
 }
 
-func getConfigFromEnv() (*microservice.Config, error) {
+func getConfigFromEnv() (microservice.Config, error) {
 	cfg := new(microservice.Config)
 	err := env.Parse(cfg)
-	return cfg, err
+	return *cfg, err
 }
