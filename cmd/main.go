@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"os"
 	"os/signal"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/joho/godotenv/autoload"
-	_ "github.com/lib/pq" // using postgres driver.
 	"go.uber.org/zap"
 
 	"microservice"
@@ -49,26 +48,17 @@ func main() {
 		}
 	}()
 
-	db, err := sql.Open("postgres", cfg.Database.URL)
+	db, err := pgxpool.New(ctx, cfg.Database.URL)
 	if err != nil {
 		logger.Error("can't open connection to postgres", zap.Error(err))
 		return
 	}
 	defer func() {
-		err = db.Close()
-		if err != nil {
-			logger.Error("can't close connection to postgres", zap.Error(err))
-		}
+		db.Close()
 	}()
-	if err := db.Ping(); err != nil {
+	if err := db.Ping(ctx); err != nil {
 		logger.Error("can't ping database", zap.Error(err))
 		return
-	}
-
-	{ // configuring db pooling.
-		db.SetMaxOpenConns(cfg.Database.MaxOpenConnections)
-		db.SetMaxIdleConns(cfg.Database.MaxIdleConnections)
-		db.SetConnMaxLifetime(cfg.Database.MaxConnLifetime)
 	}
 
 	app := microservice.New(logger, cfg, tracer, db)
