@@ -2,10 +2,10 @@ package tests
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
 	"go.opentelemetry.io/otel/trace"
