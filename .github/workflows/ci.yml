@@ -31,6 +31,9 @@ jobs:
         with:
           args: --timeout 10m
 
+      - name: Static analysis
+        run: go vet ./...
+
       - name: Set up application environment
         run: make up && sleep 10
 
@@ -38,4 +41,4 @@ jobs:
         run: make migrations-up
 
       - name: Run tests
-        run: go test -v ./...
+        run: go test -v -race ./...

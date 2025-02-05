@@ -2,12 +2,11 @@ package tests
 
 import (
 	"context"
-	"database/sql"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 
 	"github.com/caarlos0/env/v6"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -24,7 +23,7 @@ type MicroserviceSuite struct {
 
 	cfg *microservice.Config
 
-	db               *sql.DB
+	db               *pgxpool.Pool
 	tracer           trace.Tracer
 	tracerShutdowner func(ctx context.Context) error
 
@@ -36,9 +35,10 @@ type MicroserviceSuite struct {
 func (s *MicroserviceSuite) SetupSuite() {
 	ctx := context.Background()
 
-	s.cfg = getConfig()
+	cfg := getConfig()
+	s.cfg = &cfg
 
-	db, err := sql.Open("postgres", s.cfg.Database.URL)
+	db, err := pgxpool.New(ctx, s.cfg.Database.URL)
 	s.Require().NoError(err)
 
 	tracer, shutdown, err := tracer.Init(ctx, "dummy_service", s.cfg.Traces.JaegerEndpoint)
@@ -60,10 +60,9 @@ func (s *MicroserviceSuite) SetupSuite() {
 }
 
 func (s *MicroserviceSuite) TearDownSuite() {
-	err := s.db.Close()
-	s.Require().NoError(err)
+	s.db.Close()
 
-	err = s.tracerShutdowner(context.Background())
+	err := s.tracerShutdowner(context.Background())
 	s.Require().NoError(err)
 }
 
@@ -79,7 +78,7 @@ func (s *MicroserviceSuite) WithMockDB() {
 }
 
 func (s *MicroserviceSuite) WithRealDB() {
-	db, err := sql.Open("postgres", s.cfg.Database.URL)
+	db, err := pgxpool.New(context.Background(), s.cfg.Database.URL)
 	s.Require().NoError(err)
 
 	s.service = service.New(s.tracer, database.New(db))
@@ -90,16 +89,18 @@ func (s *MicroserviceSuite) WithRealDB() {
 	)
 }
 
-func getConfig() *microservice.Config {
+func getConfig() microservice.Config {
 	err := godotenv.Load(".test.env")
 	if err != nil {
 		log.Fatal("error loading .env file", zap.Error(err))
 	}
 
 	cfg := &microservice.Config{}
+
 	err = env.Parse(cfg)
 	if err != nil {
 		log.Fatal("could not parse environment variables", zap.Error(err))
 	}
-	return cfg
+
+	return *cfg
 }

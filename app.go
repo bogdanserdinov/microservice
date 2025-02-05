@@ -2,11 +2,11 @@ package microservice
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"time"
 
 	"github.com/alexliesenfeld/health"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -53,7 +53,7 @@ type App struct {
 	privateServer *private.Server
 }
 
-func New(log *zap.Logger, cfg Config, tracer trace.Tracer, db *sql.DB) *App {
+func New(log *zap.Logger, cfg Config, tracer trace.Tracer, db *pgxpool.Pool) *App {
 	app := &App{
 		cfg: cfg,
 		log: log,
@@ -113,12 +113,12 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 // readinessProbe is a helper function that returns readiness checker for given dependencies.
-func readinessProbe(db *sql.DB) health.Checker {
+func readinessProbe(db *pgxpool.Pool) health.Checker {
 	checker := health.NewChecker(
 		health.WithCheck(health.Check{
 			Name:    "database",
 			Timeout: 2 * time.Second,
-			Check:   db.PingContext,
+			Check:   db.Ping,
 		}),
 	)
 
